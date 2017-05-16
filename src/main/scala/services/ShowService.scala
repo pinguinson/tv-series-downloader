@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class ShowService(implicit db: PostgresProfile.backend.Database, executionContext: ExecutionContext) {
 
-  private val shows = TableQuery[ShowTable]
+  val shows = TableQuery[ShowTable]
 
   def getAllShows: Future[Seq[ShowEntry]] = db.run(shows.result)
 

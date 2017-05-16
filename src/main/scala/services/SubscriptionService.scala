@@ -13,7 +13,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class SubscriptionService(implicit db: PostgresProfile.backend.Database, executionContext: ExecutionContext) {
 
-  private val subscriptions = TableQuery[SubscriptionTable]
+  val subscriptions = TableQuery[SubscriptionTable]
 
   def getAllSubscriptions: Future[Seq[SubscriptionEntry]] = db.run(subscriptions.result)
 

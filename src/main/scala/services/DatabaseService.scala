@@ -17,15 +17,16 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   private val subscriptionService = new SubscriptionService
   private val userService = new UserService
 
+  import showService.shows
+  import subscriptionService.subscriptions
+
   def getNewImdbIds: Future[Seq[String]] = {
-    for {
-      allSubscriptions <- subscriptionService.getAllSubscriptions
-      allKnownShows <- showService.getAllShows
-    } yield for {
-      imdbId <- allSubscriptions.map(_.imdbId)
-      knownImdbIds = allKnownShows.map(_.imdbId)
-      if !knownImdbIds.contains(imdbId)
-    } yield imdbId
+    val query = for {
+      (sub, show) <- subscriptions joinLeft shows on (_.imdbId === _.imdbId)
+      if show.isEmpty
+    } yield sub.imdbId
+
+    db.run(query.result)
   }
 
   private def processUserRequest[T](userHash: String)(action: => Future[T], logSuccess: String, logFailure: String): Future[Option[T]] = {
