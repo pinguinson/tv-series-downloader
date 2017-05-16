@@ -1,11 +1,11 @@
 package util
 
-import java.time.LocalDate.{now, parse}
+import com.github.nscala_time.time.Imports._
 
 /**
   * Created by pinguinson on 5/6/2017.
   */
 object TimeUtil {
-  def today: String = now.toString
-  def shouldBeReleased(date: String): Boolean = now.compareTo(parse(date)) >= 0
+  def today: String = DateTime.now.toString("yyyy-MM-dd")
+  def yearAgo: String = DateTime.lastYear.toString("yyyy-MM-dd")
 }
