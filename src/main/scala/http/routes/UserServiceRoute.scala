@@ -69,8 +69,8 @@ class UserServiceRoute(implicit system: ActorSystem) {
 
                     <channel>
                       <title>Your RSS feed, {userHash}</title>
-                      <link>https://www.w3schools.com</link>
-                      <description>Your feed, fuckface</description>
+                      <link>https://github.com/pinguinson/tv-series-downloader</link>
+                      <description>RSS feed with torrents of new episodes of your favourite shows</description>
                       { episodes.sortBy(_.airDate).reverse.map(_.toXml) }
                     </channel>
                     </rss>
