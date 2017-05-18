@@ -32,6 +32,8 @@ class DatabaseActor extends Actor with ActorLogging {
     // updates from other actors
     case FoundTorrent(e) =>
       db.updateEpisode(e)
+    case TorrentNotFound(e) =>
+      db.updateEpisode(e)
 
     case s: ShowEntry =>
       db.addShow(s)
@@ -41,7 +43,7 @@ class DatabaseActor extends Actor with ActorLogging {
       db.getShowByTvdbId(showId).map {
         case Some(show) =>
           episodes.foreach { e =>
-            db.addEpisode(EpisodeEntry(show.imdbId, e.airedSeason, e.airedEpisodeNumber, e.firstAired, None, None))
+            db.addEpisode(EpisodeEntry(show.imdbId, e.airedSeason, e.airedEpisodeNumber, e.firstAired, None, None, 0))
           }
         case None =>
           log.error("Got episodes for an unknown show")
@@ -75,6 +77,7 @@ class DatabaseActor extends Actor with ActorLogging {
 
 object DatabaseActor {
   case class FoundTorrent(episode: EpisodeEntry)
+  case class TorrentNotFound(episode: EpisodeEntry)
   case class GetShowAliases(imdbId: String)
   case object GetNewShows
   case object LookForTorrents

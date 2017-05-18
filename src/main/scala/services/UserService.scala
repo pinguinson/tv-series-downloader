@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class UserService(implicit db: PostgresProfile.backend.Database, executionContext: ExecutionContext) {
 
-  private val users = TableQuery[UserTable]
+  val users = TableQuery[UserTable]
 
   def getAllUsers: Future[Seq[UserEntry]] = db.run(users.result)
 

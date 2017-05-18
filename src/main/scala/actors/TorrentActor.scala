@@ -1,6 +1,6 @@
 package actors
 
-import actors.DatabaseActor.FoundTorrent
+import actors.DatabaseActor.{FoundTorrent, TorrentNotFound}
 import actors.TorrentActor._
 import akka.actor.{Actor, ActorLogging, ActorSelection, ActorSystem, PoisonPill}
 import akka.dispatch.MessageDispatcher
@@ -75,8 +75,13 @@ class TorrentActor extends Actor with ActorLogging {
       searchForEpisode(episode).map {
         case RarbgResponse(head :: _) =>
           log.info(s"Found torrent for $episode")
-          dbActor ! FoundTorrent(episode.copy(filename = Some(head.title), magnet = Some(head.download)))
+          dbActor ! FoundTorrent(episode.copy(
+            filename = Some(head.title),
+            magnet   = Some(head.download),
+            searches = episode.searches + 1)
+          )
         case _ =>
+          dbActor ! TorrentNotFound(episode.copy(searches = episode.searches + 1))
           log.info(s"Failed to find torrent for $episode")
       }
   }

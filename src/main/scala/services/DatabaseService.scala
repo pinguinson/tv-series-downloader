@@ -17,8 +17,10 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   private val subscriptionService = new SubscriptionService
   private val userService = new UserService
 
+  import episodeService.episodes
   import showService.shows
   import subscriptionService.subscriptions
+  import userService.users
 
   def getNewImdbIds: Future[Seq[String]] = {
     val query = for {
@@ -95,7 +97,7 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   }
 
   def updateEpisode(episodeEntry: EpisodeEntry): Future[Option[EpisodeEntry]] = {
-    logger.info(s"Saving torrent for ${episodeEntry.imdbId}, s${episodeEntry.season}e${episodeEntry.episode}")
+    logger.info(s"Updating episode ${episodeEntry.imdbId}, ${episodeEntry.episodeToString}")
     episodeService.updateEpisode(episodeEntry)
   }
 

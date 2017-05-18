@@ -13,7 +13,8 @@ class EpisodeTable(tag: Tag) extends Table[EpisodeEntry](tag, "episodes") {
   def airdate = column[String]("airdate")
   def filename = column[Option[String]]("filename")
   def magnet = column[Option[String]]("magnet")
+  def searches = column[Int]("searches")
 
-  def * = (imdbId, season, episode, airdate, filename, magnet) <> (EpisodeEntry.tupled, EpisodeEntry.unapply)
+  def * = (imdbId, season, episode, airdate, filename, magnet, searches) <> (EpisodeEntry.tupled, EpisodeEntry.unapply)
 }
 
