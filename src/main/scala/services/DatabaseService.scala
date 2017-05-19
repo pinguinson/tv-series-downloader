@@ -1,6 +1,6 @@
 package services
 
-import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry}
+import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry, UserEntry}
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.meta.MTable
@@ -127,5 +127,16 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   def addEpisode(episodeEntry: EpisodeEntry): Future[Option[EpisodeEntry]] = {
     logger.info(s"Saving episode entry: $episodeEntry")
     episodeService.addEpisode(episodeEntry)
+  }
+
+  def signUp(userEntry: UserEntry): Future[Option[UserEntry]] = {
+    val result = userService.addUser(userEntry)
+    result.map {
+      case Some(_) =>
+        logger.info(s"Added user ${userEntry.username} to database")
+      case None =>
+        logger.info(s"User ${userEntry.username} is already in database")
+    }
+    result
   }
 }

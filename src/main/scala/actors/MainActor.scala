@@ -17,6 +17,9 @@ class MainActor extends Actor with ActorLogging {
     // user actions
     case msg: UserActionMessage =>
       dbActor forward msg
+    // auth actions
+    case msg: AuthActionMessage =>
+      dbActor forward msg
   }
 }
 

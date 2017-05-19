@@ -6,7 +6,7 @@ import actors.TvdbActor.{FindShow, GetShowInfo, ShowEpisodes}
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSelection}
 import akka.dispatch.MessageDispatcher
 import akka.pattern.pipe
-import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry}
+import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry, UserEntry}
 import services.DatabaseService
 
 import scala.concurrent.duration._
@@ -60,6 +60,11 @@ class DatabaseActor extends Actor with ActorLogging {
     case GetUserFeed(userHash) =>
       db.getUserFeed(userHash) pipeTo sender
 
+    // auth actions
+    case SignUp(userEntry) =>
+      db.signUp(userEntry) pipeTo sender
+
+
 
     // start regular update
     case GetNewShows =>
@@ -89,4 +94,8 @@ object DatabaseActor {
   case class Unsubscribe(userHash: String, imdbId: String) extends UserActionMessage
   case class GetUserFeed(userHash: String) extends UserActionMessage
   case class GetUserShows(userHash: String) extends UserActionMessage
+
+  // auth actions
+  trait AuthActionMessage
+  case class SignUp(userEntry: UserEntry) extends AuthActionMessage
 }
