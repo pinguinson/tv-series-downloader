@@ -13,7 +13,7 @@ import akka.stream.QueueOfferResult.Enqueued
 import akka.stream.scaladsl.{Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings, OverflowStrategy, ThrottleMode}
 import akka.util.ByteString
-import models.CCSerialization._
+import serializers.Protocols
 import models.entries.EpisodeEntry
 import spray.json._
 
@@ -23,7 +23,7 @@ import scala.util.{Failure, Success}
 /**
   * Created by pinguinson on 5/10/2017.
   */
-class TorrentActor extends Actor with ActorLogging {
+class TorrentActor extends Actor with ActorLogging with Protocols {
 
   implicit val blockingDispatcher: MessageDispatcher = context.system.dispatchers.lookup("my-blocking-dispatcher")
   implicit val system: ActorSystem = context.system

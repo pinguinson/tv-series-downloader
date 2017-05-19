@@ -7,22 +7,22 @@ import akka.http.scaladsl.client.RequestBuilding
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.pattern.pipe
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.stream.{ActorMaterializer, ActorMaterializerSettings}
 import com.typesafe.config.{Config, ConfigFactory}
 import models.entries.ShowEntry
 import spray.json._
+import serializers.Protocols
 
 import scala.concurrent.Future
 
 /**
   * Created by pinguinson on 5/8/2017.
   */
-class TvdbActor extends Actor with ActorLogging {
+class TvdbActor extends Actor with ActorLogging with Protocols {
 
-  import akka.pattern.pipe
   import context.dispatcher
-  import models.CCSerialization._
 
   implicit val system: ActorSystem = context.system
   implicit val materializer: ActorMaterializer = ActorMaterializer(ActorMaterializerSettings(system))

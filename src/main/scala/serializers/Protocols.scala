@@ -1,4 +1,4 @@
-package models
+package serializers
 
 import actors.TorrentActor.{Token => RarbgToken, _}
 import actors.TvdbActor.{Token => TvdbToken, _}
@@ -9,7 +9,7 @@ import spray.json.DefaultJsonProtocol
 /**
   * Created by pinguinson on 5/10/2017.
   */
-object CCSerialization extends SprayJsonSupport with DefaultJsonProtocol {
+trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val credentialsFormat = jsonFormat3(Credentials)
   implicit val tvdbTokenFormat = jsonFormat1(TvdbToken)
   implicit val rarbgTokenFormat = jsonFormat1(RarbgToken)

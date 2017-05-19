@@ -8,7 +8,7 @@ import akka.http.scaladsl.model._
 import akka.pattern.ask
 import akka.util.Timeout
 import models.entries.{EpisodeEntry, SubscriptionEntry}
-import models.CCSerialization._
+import serializers.Protocols
 import spray.json._
 
 import scala.xml.XML
@@ -19,7 +19,7 @@ import scala.concurrent.duration._
 /**
   * Created by pinguinson on 5/11/2017.
   */
-class UserServiceRoute(implicit system: ActorSystem) {
+class UserServiceRoute(implicit system: ActorSystem) extends Protocols {
   private val service = system.actorSelection("user/mainActor")
   private implicit val executor: ExecutionContext = system.dispatcher
   private implicit val timeout = Timeout(5 seconds)
