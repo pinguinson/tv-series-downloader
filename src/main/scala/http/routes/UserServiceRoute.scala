@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.model._
 import akka.pattern.ask
 import akka.util.Timeout
-import models.entries.{EpisodeEntry, SubscriptionEntry}
+import models.entries.{EpisodeEntry, SubscriptionEntry, UserEntry}
 import serializers.Protocols
 import spray.json._
 
@@ -28,9 +28,10 @@ class UserServiceRoute(implicit system: ActorSystem) extends Protocols {
     pathPrefix("user") {
       pathPrefix("subscribe") {
         post {
-          parameters('userHash.as[String], 'imdbId.as[String], 'season.as[Int], 'episode.as[Int]) { (userHash, imdbId, season, episode) =>
-            val subscriptionEntry = SubscriptionEntry(userHash, imdbId, season, episode, watching = true)
-            val serviceResponse = (service ? Subscribe(subscriptionEntry)).mapTo[Option[SubscriptionEntry]]
+          parameters('username.as[String], 'passwordHash.as[String], 'imdbId.as[String], 'season.as[Int], 'episode.as[Int]) { (username, passwordHash, imdbId, season, episode) =>
+            val userEntry = UserEntry(username, passwordHash)
+            val subscriptionEntry = SubscriptionEntry(userEntry.md5, imdbId, season, episode, watching = true)
+            val serviceResponse = (service ? Subscribe(userEntry, subscriptionEntry)).mapTo[Option[SubscriptionEntry]]
             onComplete(serviceResponse) {
               case Success(Some(entry)) =>
                 complete(entry.toJson.prettyPrint)
@@ -44,8 +45,9 @@ class UserServiceRoute(implicit system: ActorSystem) extends Protocols {
       } ~
       pathPrefix("unsubscribe") {
         post {
-          parameters('userHash.as[String], 'imdbId.as[String]) { (userHash, imdbId) =>
-            val serviceResponse = (service ? Unsubscribe(userHash, imdbId)).mapTo[Option[String]]
+          parameters('username.as[String], 'passwordHash.as[String], 'imdbId.as[String]) { (username, passwordHash, imdbId) =>
+            val userEntry = UserEntry(username, passwordHash)
+            val serviceResponse = (service ? Unsubscribe(userEntry, imdbId)).mapTo[Option[String]]
             onComplete(serviceResponse) {
               case Success(Some(response)) =>
                 complete(response)
@@ -60,15 +62,16 @@ class UserServiceRoute(implicit system: ActorSystem) extends Protocols {
       pathPrefix("feed") {
         pathEndOrSingleSlash {
           get {
-            parameters('userHash.as[String]) { userHash =>
-              val serviceResponse = (service ? GetUserFeed(userHash)).mapTo[Option[List[EpisodeEntry]]]
+            parameters('username.as[String], 'passwordHash.as[String]) { (username, passwordHash) =>
+              val userEntry = UserEntry(username, passwordHash)
+              val serviceResponse = (service ? GetUserFeed(userEntry)).mapTo[Option[List[EpisodeEntry]]]
               onComplete(serviceResponse) {
                 case Success(Some(episodes)) =>
                   val rss =
                     <rss version="2.0">
 
                     <channel>
-                      <title>Your RSS feed, {userHash}</title>
+                      <title>Your RSS feed, {userEntry.username}</title>
                       <link>https://github.com/pinguinson/tv-series-downloader</link>
                       <description>RSS feed with torrents of new episodes of your favourite shows</description>
                       { episodes.sortBy(_.airDate).reverse.map(_.toXml) }

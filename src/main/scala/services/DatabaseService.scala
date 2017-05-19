@@ -49,8 +49,8 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
     db.run(query.result)
   }
 
-  private def processUserRequest[T](userHash: String)(action: => Future[T], logSuccess: String, logFailure: String): Future[Option[T]] = {
-    userService.findUserByPasswordHash(userHash).flatMap {
+  private def processUserRequest[T](userEntry: UserEntry)(action: => Future[T], logSuccess: String, logFailure: String): Future[Option[T]] = {
+    userService.findUserByName(userEntry.username).flatMap {
       case Some(_) =>
         logger.info(logSuccess)
         action.map(Some(_))
@@ -60,31 +60,31 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
     }
   }
 
-  def subscribeToShow(subscription: SubscriptionEntry): Future[Option[SubscriptionEntry]] =
-    processUserRequest(subscription.userHash)(
+  def subscribeToShow(user: UserEntry, subscription: SubscriptionEntry): Future[Option[SubscriptionEntry]] =
+    processUserRequest(user)(
       subscriptionService.subscribeToShow(subscription),
-      s"Subscribing ${subscription.userHash} to ${subscription.imdbId}",
+      s"Subscribing ${user.username} to ${subscription.imdbId}",
       s"Unknown user tried to subscribe."
     )
 
-  def unsubscribeFromShow(userHash: String, imdbId: String): Future[Option[String]] =
-    processUserRequest(userHash)(
-      subscriptionService.unsubscribeFromShow(userHash, imdbId),
-      s"Unsubscribing $userHash from $imdbId",
+  def unsubscribeFromShow(userEntry: UserEntry, imdbId: String): Future[Option[String]] =
+    processUserRequest(userEntry)(
+      subscriptionService.unsubscribeFromShow(userEntry.md5, imdbId),
+      s"Unsubscribing ${userEntry.username} from $imdbId",
       s"Unknown user tried to unsubscribe."
     )
 
-  def getUserFeed(userHash: String): Future[Option[List[EpisodeEntry]]] =
-    processUserRequest(userHash)(
+  def getUserFeed(userEntry: UserEntry): Future[Option[List[EpisodeEntry]]] =
+    processUserRequest(userEntry)(
       {
-        subscriptionService.getUserSubscriptions(userHash).flatMap { subs =>
+        subscriptionService.getUserSubscriptions(userEntry.md5).flatMap { subs =>
           val episodes = subs.map { sub =>
             episodeService.getEpisodesWithTorrents(sub.imdbId, sub.startWithSeason, sub.startWithEpisode)
           }
           Future.foldLeft(episodes)(List.empty[EpisodeEntry])(_ ++ _)
         }
       },
-      s"Getting feed for $userHash",
+      s"Getting feed for ${userEntry.username}",
       s"Unknown user tried to fetch feed"
     )
 
