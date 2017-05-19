@@ -3,10 +3,10 @@ package services
 import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry}
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
+import slick.jdbc.meta.MTable
 import slick.util.Logging
 
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 /**
   * Created by pinguinson on 5/5/2017.
   */
@@ -21,6 +21,24 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   import showService.shows
   import subscriptionService.subscriptions
   import userService.users
+
+  private val tables = List(episodes, shows, subscriptions, users)
+
+  /** Creates missing tables */
+  def createSchemaIfNotExists: Future[Unit] = {
+    val existing = db.run(MTable.getTables)
+    existing.flatMap { v =>
+      val names = v.map(_.name.name)
+      val missingTables = tables.filterNot(table => names.contains(table.baseTableRow.tableName))
+      val createIfNotExist = missingTables.map { table =>
+        println(s"Table ${table.baseTableRow.tableName} is missing, creating...")
+        table.schema.create
+      }
+      db.run(DBIO.seq(createIfNotExist: _*))
+
+    }
+
+  }
 
   def getNewImdbIds: Future[Seq[String]] = {
     val query = for {

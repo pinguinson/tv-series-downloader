@@ -26,6 +26,7 @@ class DatabaseActor extends Actor with ActorLogging {
 
   context.system.scheduler.schedule(10 seconds, 1 minute)(self ! LookForTorrents)
   context.system.scheduler.schedule(10 seconds, 1 minute)(self ! GetNewShows)
+  db.createSchemaIfNotExists
 
   def receive: Receive = {
 
