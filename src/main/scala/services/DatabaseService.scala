@@ -139,4 +139,12 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
     }
     result
   }
+
+  def getUserShows(userEntry: UserEntry): Future[Option[List[SubscriptionEntry]]] = {
+    processUserRequest(userEntry)(
+      subscriptionService.getUserSubscriptions(userEntry.md5),
+      s"Getting shows for ${userEntry.username}",
+      s"Unknown user tried to get shows"
+    )
+  }
 }

@@ -1,6 +1,6 @@
 package http.routes
 
-import actors.DatabaseActor.{GetUserFeed, Subscribe, Unsubscribe}
+import actors.DatabaseActor._
 import akka.http.scaladsl.server.Directives._
 import akka.actor.ActorSystem
 import akka.http.scaladsl.server.Route
@@ -82,6 +82,24 @@ class UserServiceRoute(implicit system: ActorSystem) extends Protocols {
                   complete {
                     HttpResponse(entity = HttpEntity(ContentType(MediaTypes.`application/rss+xml`, HttpCharsets.`UTF-8`), writer.toString))
                   }
+                case Success(None) =>
+                  complete("User not found")
+                case Failure(ex) =>
+                  complete(ex.getMessage)
+              }
+            }
+          }
+        }
+      } ~
+      pathPrefix("shows") {
+        pathEndOrSingleSlash {
+          get {
+            parameters('username.as[String], 'passwordHash.as[String]) { (username, passwordHash) =>
+              val userEntry = UserEntry(username, passwordHash)
+              val serviceResponse = (service ? GetUserShows(userEntry)).mapTo[Option[List[SubscriptionEntry]]]
+              onComplete(serviceResponse) {
+                case Success(Some(shows)) =>
+                  complete(Subscriptions(shows).toJson.prettyPrint)
                 case Success(None) =>
                   complete("User not found")
                 case Failure(ex) =>

@@ -1,5 +1,6 @@
 package serializers
 
+import actors.DatabaseActor.Subscriptions
 import actors.TorrentActor.{Token => RarbgToken, _}
 import actors.TvdbActor.{Token => TvdbToken, _}
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
@@ -23,4 +24,6 @@ trait Protocols extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val episodeInfoFormat = jsonFormat4(EpisodeInfo)
   implicit val episodeTorrentFormat = jsonFormat4(EpisodeTorrent)
   implicit val rarbgResponseFormat = jsonFormat1(RarbgResponse)
+
+  implicit val listOfShowsFormat = jsonFormat1(Subscriptions)
 }

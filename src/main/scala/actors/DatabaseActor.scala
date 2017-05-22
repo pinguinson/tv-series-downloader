@@ -54,11 +54,14 @@ class DatabaseActor extends Actor with ActorLogging {
     case Subscribe(userEntry, subscriptionEntry) =>
       db.subscribeToShow(userEntry, subscriptionEntry) pipeTo sender
 
-    case Unsubscribe(userHash, imdbId) =>
-      db.unsubscribeFromShow(userHash, imdbId) pipeTo sender
+    case Unsubscribe(userEntry, imdbId) =>
+      db.unsubscribeFromShow(userEntry, imdbId) pipeTo sender
 
-    case GetUserFeed(userHash) =>
-      db.getUserFeed(userHash) pipeTo sender
+    case GetUserFeed(userEntry) =>
+      db.getUserFeed(userEntry) pipeTo sender
+
+    case GetUserShows(userEntry) =>
+      db.getUserShows(userEntry) pipeTo sender
 
     // auth actions
     case SignUp(userEntry) =>
@@ -94,6 +97,7 @@ object DatabaseActor {
   case class Unsubscribe(userEntry: UserEntry, imdbId: String) extends UserActionMessage
   case class GetUserFeed(userEntry: UserEntry) extends UserActionMessage
   case class GetUserShows(userEntry: UserEntry) extends UserActionMessage
+  case class Subscriptions(shows: List[SubscriptionEntry])
 
   // auth actions
   trait AuthActionMessage
