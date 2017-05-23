@@ -1,6 +1,5 @@
 package models.tables
 
-
 import models.entries.SubscriptionEntry
 import slick.jdbc.PostgresProfile.api._
 /**

@@ -67,6 +67,12 @@ class DatabaseActor extends Actor with ActorLogging {
     case SignUp(userEntry) =>
       db.signUp(userEntry) pipeTo sender
 
+    case LogIn(userEntry) =>
+      db.signIn(userEntry) pipeTo sender
+
+    case Authenticate(token) =>
+      db.authenticate(token) pipeTo sender
+
 
 
     // start regular update
@@ -102,4 +108,6 @@ object DatabaseActor {
   // auth actions
   trait AuthActionMessage
   case class SignUp(userEntry: UserEntry) extends AuthActionMessage
+  case class LogIn(userEntry: UserEntry) extends AuthActionMessage
+  case class Authenticate(token: String) extends AuthActionMessage
 }

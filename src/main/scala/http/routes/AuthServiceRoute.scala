@@ -1,47 +1,60 @@
 package http.routes
 
-import actors.DatabaseActor.SignUp
-import akka.http.scaladsl.server.Directives._
-import akka.actor.ActorSystem
-import akka.http.scaladsl.server.Route
+import akka.actor.{ActorSelection, ActorSystem}
 import akka.http.scaladsl.model._
-import akka.pattern.ask
+import akka.http.scaladsl.model.headers.HttpCookie
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.util.Timeout
+import http.SecurityDirectives
 import models.entries.UserEntry
 import serializers.Protocols
-import spray.json._
+import services.AuthService
+import util.MD5.hash
 
 import scala.util.{Failure, Success}
-import scala.concurrent.ExecutionContext
-import scala.concurrent.duration._
 
 /**
   * Created by pinguinson on 5/19/2017.
   */
-class AuthServiceRoute(implicit system: ActorSystem) extends Protocols {
+class AuthServiceRoute(val authService: AuthService)(implicit system: ActorSystem, timeout: Timeout, service: ActorSelection) extends Protocols with SecurityDirectives {
 
-  private val service = system.actorSelection("user/mainActor")
-  private implicit val executor: ExecutionContext = system.dispatcher
-  private implicit val timeout = Timeout(5 seconds)
+  import authService._
 
   val route: Route =
     pathPrefix("auth") {
-      pathPrefix("signup") {
+      path("signUp") {
         post {
-          parameters('username.as[String], 'passwordHash.as[String]) { (username, passwordHash) =>
-            val userEntry = UserEntry(username, passwordHash)
-            val serviceResponse = (service ? SignUp(userEntry)).mapTo[Option[UserEntry]]
-            onComplete(serviceResponse) {
-              case Success(Some(user)) =>
-                complete(s"Registered user ${user.username}")
-              case Success(None) =>
-                complete(s"User ${userEntry.username} is already registered")
+          parameters('username.as[String], 'password.as[String]) { (username, password) =>
+            val userEntry = UserEntry(username, hash(password))
+            onComplete(signUp(userEntry)) {
+              case Success(token) =>
+                complete(s"Registered user $token")
               case Failure(ex) =>
                 complete(ex.getMessage)
             }
           }
         }
-      }
+      } ~
+        path("signIn") {
+          post {
+            parameters('username.as[String], 'password.as[String]) { (username, password) =>
+              val userEntry = UserEntry(username, hash(password))
+              onComplete(signIn(userEntry)) {
+                case Success(Some(tokenEntry)) =>
+                  giveToken(tokenEntry)
+                case Success(None) =>
+                  complete(s"User with name $username and password $password not found")
+                case Failure(ex) =>
+                  complete(ex.getMessage + "top kek")
+              }
+            }
+          }
+        } ~
+        path("signOut") {
+          post {
+            deleteToken()
+          }
+        }
     }
-
 }

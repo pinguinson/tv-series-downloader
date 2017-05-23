@@ -20,5 +20,6 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.4-1206-jdbc42",
   "io.spray" %% "spray-json" % "1.3.3",
   "org.scala-lang.modules" %% "scala-xml" % "1.0.6",
-  "com.github.nscala-time" %% "nscala-time" % "2.16.0"
+  "com.github.nscala-time" %% "nscala-time" % "2.16.0",
+  "ch.megard" %% "akka-http-cors" % "0.2.1"
 )

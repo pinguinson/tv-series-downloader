@@ -1,7 +1,7 @@
 package services
 
-import models.entries.SubscriptionEntry
-import models.tables.SubscriptionTable
+import models.entries.{ShowEntry, SubscriptionEntry}
+import models.tables.{ShowTable, SubscriptionTable}
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.lifted.TableQuery

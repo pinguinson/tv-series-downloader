@@ -1,6 +1,6 @@
 package services
 
-import models.entries.{EpisodeEntry, ShowEntry, SubscriptionEntry, UserEntry}
+import models.entries._
 import slick.jdbc.PostgresProfile
 import slick.jdbc.PostgresProfile.api._
 import slick.jdbc.meta.MTable
@@ -16,13 +16,15 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   private val showService = new ShowService
   private val subscriptionService = new SubscriptionService
   private val userService = new UserService
+  private val authService = new AuthService
 
   import episodeService.episodes
   import showService.shows
   import subscriptionService.subscriptions
   import userService.users
+  import authService.tokens
 
-  private val tables = List(episodes, shows, subscriptions, users)
+  private val tables = List(episodes, shows, subscriptions, users, tokens)
 
   /** Creates missing tables */
   def createSchemaIfNotExists: Future[Unit] = {
@@ -129,17 +131,6 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
     episodeService.addEpisode(episodeEntry)
   }
 
-  def signUp(userEntry: UserEntry): Future[Option[UserEntry]] = {
-    val result = userService.addUser(userEntry)
-    result.map {
-      case Some(_) =>
-        logger.info(s"Added user ${userEntry.username} to database")
-      case None =>
-        logger.info(s"User ${userEntry.username} is already in database")
-    }
-    result
-  }
-
   def getUserShows(userEntry: UserEntry): Future[Option[List[SubscriptionEntry]]] = {
     processUserRequest(userEntry)(
       subscriptionService.getUserSubscriptions(userEntry.md5),
@@ -147,4 +138,14 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
       s"Unknown user tried to get shows"
     )
   }
+
+  def signIn(userEntry: UserEntry): Future[Option[TokenEntry]] =
+    authService.signIn(userEntry)
+
+  def signUp(userEntry: UserEntry): Future[TokenEntry] =
+    authService.signUp(userEntry)
+
+  def authenticate(token: String): Future[Option[UserEntry]] =
+    authService.authenticate(token)
+
 }

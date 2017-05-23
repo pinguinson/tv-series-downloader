@@ -24,7 +24,7 @@ class UserService(implicit db: PostgresProfile.backend.Database, executionContex
     db.run(users.filter(_.md5password === md5password).result.headOption)
 
   def addUser(user: UserEntry): Future[Option[UserEntry]] = findUserByName(user.username).flatMap {
-  case Some(_) => Future.successful(None)
-  case None => db.run(users += user).map(_ => Some(user))
-}
+    case Some(_) => Future.successful(None)
+    case None => db.run(users += user).map(_ => Some(user))
+  }
 }
