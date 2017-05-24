@@ -24,37 +24,31 @@ class AuthServiceRoute(val authService: AuthService)(implicit system: ActorSyste
   val route: Route =
     pathPrefix("auth") {
       path("signUp") {
-        post {
-          parameters('username.as[String], 'password.as[String]) { (username, password) =>
-            val userEntry = UserEntry(username, hash(password))
-            onComplete(signUp(userEntry)) {
-              case Success(token) =>
-                complete(s"Registered user $token")
-              case Failure(ex) =>
-                complete(ex.getMessage)
-            }
+        parameters('username.as[String], 'password.as[String]) { (username, password) =>
+          val userEntry = UserEntry(username, hash(password))
+          onComplete(signUp(userEntry)) {
+            case Success(token) =>
+              complete(s"Registered user $token")
+            case Failure(ex) =>
+              complete(ex.getMessage)
           }
         }
       } ~
         path("signIn") {
-          post {
-            parameters('username.as[String], 'password.as[String]) { (username, password) =>
-              val userEntry = UserEntry(username, hash(password))
-              onComplete(signIn(userEntry)) {
-                case Success(Some(tokenEntry)) =>
-                  giveToken(tokenEntry)
-                case Success(None) =>
-                  complete(s"User with name $username and password $password not found")
-                case Failure(ex) =>
-                  complete(ex.getMessage + "top kek")
-              }
+          parameters('username.as[String], 'password.as[String]) { (username, password) =>
+            val userEntry = UserEntry(username, hash(password))
+            onComplete(signIn(userEntry)) {
+              case Success(Some(tokenEntry)) =>
+                giveToken(tokenEntry)
+              case Success(None) =>
+                complete(s"User with name $username and password $password not found")
+              case Failure(ex) =>
+                complete(ex.getMessage + "top kek")
             }
           }
         } ~
         path("signOut") {
-          post {
-            deleteToken()
-          }
+          deleteToken()
         }
     }
 }

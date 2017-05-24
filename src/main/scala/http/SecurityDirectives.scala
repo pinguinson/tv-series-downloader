@@ -3,7 +3,6 @@ package http
 import akka.http.scaladsl.model.DateTime
 import akka.http.scaladsl.model.headers.HttpCookie
 import akka.http.scaladsl.server.{Directive1, Route}
-import akka.http.scaladsl.server.directives._
 import akka.http.scaladsl.server.Directives._
 import models.entries.{TokenEntry, UserEntry}
 import services.AuthService
