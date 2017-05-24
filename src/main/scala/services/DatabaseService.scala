@@ -135,7 +135,7 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   def getUserShows(userEntry: UserEntry): Future[Option[List[SubscriptionEntry]]] = {
     val smth = db.run((for {
       sub <- subscriptions if sub.userHash === userEntry.md5
-      show <- shows
+      show <- shows if show.imdbId === sub.imdbId
     } yield (show.title, sub)).result)
     smth.map(seq => Some(seq.map(x => x._2.copy(imdbId = x._1)).toList))
   }
