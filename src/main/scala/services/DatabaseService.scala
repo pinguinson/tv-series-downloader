@@ -131,12 +131,13 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
     episodeService.addEpisode(episodeEntry)
   }
 
+  // For now using ugly hack: setting `imdbId` to show title
   def getUserShows(userEntry: UserEntry): Future[Option[List[SubscriptionEntry]]] = {
-    processUserRequest(userEntry)(
-      subscriptionService.getUserSubscriptions(userEntry.md5),
-      s"Getting shows for ${userEntry.username}",
-      s"Unknown user tried to get shows"
-    )
+    val smth = db.run((for {
+      sub <- subscriptions if sub.userHash === userEntry.md5
+      show <- shows
+    } yield (show.title, sub)).result)
+    smth.map(seq => Some(seq.map(x => x._2.copy(imdbId = x._1)).toList))
   }
 
   def signIn(userEntry: UserEntry): Future[Option[TokenEntry]] =
