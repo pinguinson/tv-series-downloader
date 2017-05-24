@@ -24,9 +24,9 @@ trait SecurityDirectives {
       case Some(cookie) =>
         onComplete(authService.authenticate(cookie.value)).flatMap {
           case Success(Some(loggedUser)) => provide(loggedUser)
-          case _ => reject
+          case _ => complete(s"Invalid $tokenName")
         }
-      case None => reject
+      case None => complete(s"Cookie $tokenName not found")
     }
   }
 
