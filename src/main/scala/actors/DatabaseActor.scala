@@ -52,7 +52,8 @@ class DatabaseActor extends Actor with ActorLogging {
 
     // user actions
     case Subscribe(userEntry, subscriptionEntry) =>
-      db.subscribeToShow(userEntry, subscriptionEntry) pipeTo sender
+      db.subscribeToShow(userEntry, subscriptionEntry) pipeTo sender()
+      self ! GetNewShows
 
     case Unsubscribe(userEntry, imdbId) =>
       db.unsubscribeFromShow(userEntry, imdbId) pipeTo sender
