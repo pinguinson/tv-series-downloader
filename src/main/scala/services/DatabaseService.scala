@@ -134,10 +134,9 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   // For now using ugly hack: setting `imdbId` to show title
   def getUserShows(userEntry: UserEntry): Future[Option[List[SubscriptionEntry]]] = {
     val smth = db.run((for {
-      sub <- subscriptions if sub.userHash === userEntry.md5
-      show <- shows if show.imdbId === sub.imdbId
-    } yield (show.title, sub)).result)
-    smth.map(seq => Some(seq.map(x => x._2.copy(imdbId = x._1)).toList))
+      (sub, show) <- subscriptions.filter(_.userHash === userEntry.md5) joinLeft shows on (_.imdbId === _.imdbId)
+    } yield (show.map(_.title), sub)).result)
+    smth.map(seq => Some(seq.map(x => x._2.copy(imdbId = x._1.getOrElse(x._2.imdbId))).toList))
   }
 
   def signIn(userEntry: UserEntry): Future[Option[TokenEntry]] =
