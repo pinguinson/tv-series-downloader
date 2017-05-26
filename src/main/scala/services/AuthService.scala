@@ -28,8 +28,13 @@ class AuthService(implicit db: PostgresProfile.backend.Database, executionContex
     }
   }
 
-  def signUp(userEntry: UserEntry): Future[TokenEntry] =
-    db.run(users += userEntry).flatMap(_ => createToken(userEntry))
+  def signUp(userEntry: UserEntry): Future[Option[TokenEntry]] =
+    db.run(users.filter(_.username === userEntry.username).result.headOption).flatMap {
+      case Some(_) =>
+        Future.successful(None)
+      case None =>
+        db.run(users += userEntry).flatMap(_ => createToken(userEntry)).map(Some(_))
+    }
 
   def authenticate(token: String): Future[Option[UserEntry]] =
     db.run((for {

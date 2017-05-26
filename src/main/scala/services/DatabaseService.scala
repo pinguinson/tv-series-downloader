@@ -143,7 +143,7 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
   def signIn(userEntry: UserEntry): Future[Option[TokenEntry]] =
     authService.signIn(userEntry)
 
-  def signUp(userEntry: UserEntry): Future[TokenEntry] =
+  def signUp(userEntry: UserEntry): Future[Option[TokenEntry]] =
     authService.signUp(userEntry)
 
   def authenticate(token: String): Future[Option[UserEntry]] =

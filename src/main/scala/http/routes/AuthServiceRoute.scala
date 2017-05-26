@@ -27,8 +27,10 @@ class AuthServiceRoute(val authService: AuthService)(implicit system: ActorSyste
         parameters('username.as[String], 'password.as[String]) { (username, password) =>
           val userEntry = UserEntry(username, hash(password))
           onComplete(signUp(userEntry)) {
-            case Success(token) =>
-              complete(s"Registered user $token")
+            case Success(Some(tokenEntry)) =>
+              complete(s"Registered user $tokenEntry")
+            case Success(None) =>
+              complete(s"User with name $username already exists")
             case Failure(ex) =>
               complete(ex.getMessage)
           }
@@ -43,7 +45,7 @@ class AuthServiceRoute(val authService: AuthService)(implicit system: ActorSyste
               case Success(None) =>
                 complete(s"User with name $username and password $password not found")
               case Failure(ex) =>
-                complete(ex.getMessage + "top kek")
+                complete(ex.getMessage)
             }
           }
         } ~
