@@ -7,5 +7,5 @@ import com.github.nscala_time.time.Imports._
   */
 object TimeUtil {
   def today: String = DateTime.now.toString("yyyy-MM-dd")
-  def yearAgo: String = DateTime.lastYear.toString("yyyy-MM-dd")
+  def weekAgo: String = DateTime.lastWeek.toString("yyyy-MM-dd")
 }

@@ -46,7 +46,7 @@ class EpisodeService(implicit db: PostgresProfile.backend.Database, executionCon
       e.magnet.isEmpty &&
         e.airdate <= today &&
         // ignore old episodes with no torrents
-        !(e.airdate <= yearAgo && e.searches >= 1) &&
+        !(e.airdate <= weekAgo && e.searches >= 1) &&
         // ignore special episodes
         e.season >= 1
     ).result)
