@@ -1,12 +1,21 @@
-# tv-series-downloader
-Generates rss feed with torrents of new episode of your favourite shows
+# TV Series Downloader
+Keeps track of all your favourite TV shows and builds personal RSS feed with magnet links to all new episodes.
+
+![Screenshot](screenshot.png)
 
 ## Disclaimer
-This service was created as a training project and only because there is no way to watch all my favourite TV shows (in english, without god awful russian voice acting) legally.
+This service was created as a training project and only because there is no way to watch all my favourite TV shows properly (in english with subtitles, without god awful russian voice acting) legally.
 
 ## Structure
-Database: PostgreSQL
 
-Backend: Scala, akka-http, Slick for database access
+#### Backend
+Built with Scala, using following libraries:
+ - akka (actors and akka-http for routing) 
+ - slick (database access)
+ - spray-json (self-explanatory)
 
-Frontend: Vue.js
+#### Database
+ - PostgreSQL
+
+#### Frontend
+ - vue.js
