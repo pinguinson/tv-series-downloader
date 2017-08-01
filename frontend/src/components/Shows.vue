@@ -32,6 +32,10 @@
       </form>
     </li>
   </ul>
+  <div class="form-group">
+    <label for="comment">Your personal RSS feed link, copy and feed it to your favourite torrent client:</label>
+    <textarea class="form-control" rows="1" id="comment" spellcheck="false" style="resize:none" onclick="this.focus();this.select()">{{ this.feedUrl }}</textarea>
+  </div>
   </div>
 </template>
 
@@ -44,12 +48,21 @@ export default {
     shows: [],
     imdbId: '',
     season: '',
-    episode: ''
+    episode: '',
+    feedUrl: ''
   }),
   created () {
     this.getShows()
+    this.getFeedLink()
   },
   methods: {
+    getFeedLink () {
+      axios.defaults.withCredentials = true
+      axios.get('api/user/feed')
+      .then(response => {
+        this.feedUrl = `http://localhost:9000/feed/${response.data}`
+      })
+    },
     getShows () {
       axios.defaults.withCredentials = true
       axios.get('api/user/shows')
