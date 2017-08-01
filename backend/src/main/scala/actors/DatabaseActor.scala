@@ -62,6 +62,9 @@ class DatabaseActor extends Actor with ActorLogging {
     case GetUserFeed(userEntry) =>
       db.getUserFeed(userEntry) pipeTo sender
 
+    case GetUserFeedByHash(hash) =>
+      db.getUserFeed(hash) pipeTo sender
+
     case GetUserShows(userEntry) =>
       db.getUserShows(userEntry) pipeTo sender
 
@@ -113,6 +116,8 @@ object DatabaseActor {
   case class Unsubscribe(userEntry: UserEntry, imdbId: String) extends UserActionMessage
 
   case class GetUserFeed(userEntry: UserEntry) extends UserActionMessage
+
+  case class GetUserFeedByHash(userHash: String) extends UserActionMessage
 
   case class GetUserShows(userEntry: UserEntry) extends UserActionMessage
 

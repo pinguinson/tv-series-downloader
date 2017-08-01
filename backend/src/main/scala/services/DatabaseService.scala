@@ -29,9 +29,10 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
 
   /** Creates missing tables */
   def createSchemaIfNotExists: Future[Unit] = {
+    println("creating tables")
     val existing = db.run(MTable.getTables)
     existing.flatMap { v =>
-      println("creating tables")
+      println("creating tables (inside flatmap)")
       val names = v.map(_.name.name)
       println(names)
       val missingTables = tables.filterNot(table => names.contains(table.baseTableRow.tableName))
@@ -81,17 +82,18 @@ class DatabaseService(dbConfigName: String)(implicit executionContext: Execution
 
   def getUserFeed(userEntry: UserEntry): Future[Option[List[EpisodeEntry]]] =
     processUserRequest(userEntry)(
-      {
-        subscriptionService.getUserSubscriptions(userEntry.md5).flatMap { subs =>
-          val episodes = subs.map { sub =>
-            episodeService.getEpisodesWithTorrents(sub.imdbId, sub.startWithSeason, sub.startWithEpisode)
-          }
-          Future.foldLeft(episodes)(List.empty[EpisodeEntry])(_ ++ _)
-        }
-      },
+      getUserFeed(userEntry.md5),
       s"Getting feed for ${userEntry.username}",
       s"Unknown user tried to fetch feed"
     )
+
+  def getUserFeed(userHash: String): Future[List[EpisodeEntry]] =
+    subscriptionService.getUserSubscriptions(userHash).flatMap { subs =>
+      val episodes = subs.map { sub =>
+        episodeService.getEpisodesWithTorrents(sub.imdbId, sub.startWithSeason, sub.startWithEpisode)
+      }
+      Future.foldLeft(episodes)(List.empty[EpisodeEntry])(_ ++ _)
+    }
 
   def getEpisodesWithoutTorrents: Future[Seq[EpisodeEntry]] = {
     logger.info("Getting all episodes without torrents")

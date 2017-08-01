@@ -5,7 +5,7 @@ import akka.dispatch.MessageDispatcher
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import http.routes.{AuthServiceRoute, UserServiceRoute}
+import http.routes.{AuthServiceRoute, FeedServiceRoute, UserServiceRoute}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 import services.AuthService
 import slick.jdbc.PostgresProfile.api._
@@ -26,6 +26,10 @@ class HttpService(implicit system: ActorSystem) {
 
   val userRouter = new UserServiceRoute(authService)
   val authRouter = new AuthServiceRoute(authService)
+  val feedRouter = new FeedServiceRoute()
 
-  val route: Route = cors() { userRouter.route ~ authRouter.route }
+  val route: Route = cors() {
+    userRouter.route ~
+      authRouter.route ~
+      feedRouter.route }
 }

@@ -13,6 +13,7 @@ import models.entries.{EpisodeEntry, SubscriptionEntry}
 import serializers.Protocols
 import services.AuthService
 import spray.json._
+import spray.json.DefaultJsonProtocol._
 
 import scala.util.{Failure, Success}
 import scala.xml.XML
@@ -66,28 +67,8 @@ class UserServiceRoute(val authService: AuthService)(implicit system: ActorSyste
             }
           } ~
           path("feed") {
-            val serviceResponse = (service ? GetUserFeed(loggedUser)).mapTo[Option[List[EpisodeEntry]]]
-            onComplete(serviceResponse) {
-              case Success(Some(episodes)) =>
-                val rss =
-                  <rss version="2.0">
-                    <channel>
-                      <title>Your RSS feed, {loggedUser.username}</title>
-                      <link>https://github.com/pinguinson/tv-series-downloader</link>
-                      <description>RSS feed with torrents of new episodes of your favourite shows</description>
-                      {episodes.sortBy(_.airDate).reverse.map(_.toXml)}
-                    </channel>
-                  </rss>
-                val writer = new java.io.StringWriter
-                XML.write(writer, rss, "utf-8", xmlDecl = true, doctype = null)
-                complete {
-                  HttpResponse(entity = HttpEntity(ContentType(MediaTypes.`application/rss+xml`, HttpCharsets.`UTF-8`), writer.toString))
-                }
-              case Success(None) =>
-                complete("User not found")
-              case Failure(ex) =>
-                complete(ex.getMessage)
-            }
+            // simply respond with user hash
+            complete(loggedUser.md5.toJson)
           }
       }
     }
